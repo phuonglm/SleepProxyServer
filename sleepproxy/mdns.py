@@ -53,7 +53,7 @@ def handle(mac, records):
     if mac in _HOSTS:
         logging.debug("I already seem to be handling mDNS for %s" % (mac, ))
         return
-    logging.info('Now mirroring mDNS advertisements from %s to local Avahi server' % (mac))
+    logging.debug('Now mirroring mDNS advertisements from %s to local Avahi server' % (mac))
     group = _get_group()
     _HOSTS[mac] = group
     _update_to_group(group, records)
@@ -61,7 +61,7 @@ def handle(mac, records):
     logging.debug("Result of Commit() on mDNS records was %s" % (result, ))
 
 def forget(mac):
-    logging.info("Removing %s from mDNS handler & Avahi" % (mac, ))
+    logging.debug("Removing %s from mDNS handler & Avahi" % (mac, ))
     if mac not in _HOSTS:
         logging.debug("I don't seem to be managing mDNS for %s" % (mac, ))
         return
@@ -97,7 +97,7 @@ def _update_to_group(group, rrsets):
                   dbus.UInt32(rrset.ttl), #ttl
                   string_array_to_txt_array([record.to_digestable()])[0] #rdata
                 )
-                logging.info('added mDNS record to Avahi: %s' % rrset.to_text())
+                logging.debug('added mDNS record to Avahi: %s' % (rrset.to_text()))
             except UnicodeDecodeError:
                 logging.warn('malformed unicode in rdata, skipping: %s' % rrset.to_text())
             except dbus.exceptions.DBusException, e:

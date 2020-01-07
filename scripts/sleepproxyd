@@ -22,7 +22,7 @@ class MultilineSysLogHandler(logging.handlers.SysLogHandler):
 
 def glisten(bindaddr):
     # TODO: support systemd socket activation
-    logging.warning("listening for SleepProxyServer requests on UDP:[%s]:3535" % bindaddr)
+    logging.info("listening for SleepProxyServer requests on UDP:[%s]:3535" % bindaddr)
     return dnsserve.SleepProxyServer((bindaddr, 3535))
 
 anyaddr = ['0.0.0.0']
@@ -33,12 +33,12 @@ parser.add_argument('--verbose', action='store_true', help='Run with verbose log
 parser.add_argument('--bind', nargs='*', default=anyaddr, help='IP address[es] to listen for sleeper registrations')
 args = parser.parse_args()
 
-logfmt = 'sleepproxyd[%(process)d/%(threadName)s@%(module)s:%(levelname)s] %(message)s' #http://docs.python.org/2/library/logging.html#logrecord-attributes
+logfmt = '%(asctime)s: sleepproxyd[%(process)d/%(threadName)s@%(module)s:%(levelname)s] %(message)s' #http://docs.python.org/2/library/logging.html#logrecord-attributes
 
 if args.verbose:
     logging.basicConfig(format=logfmt + ' --(%(pathname)s:%(lineno)d)--', level=logging.DEBUG)
 else:
-    logging.basicConfig(format=logfmt, level=logging.WARNING)
+    logging.basicConfig(format=logfmt, level=logging.INFO)
 
 syslog=MultilineSysLogHandler(address='/dev/log') #post messages to syslog in addition to stdout
 syslog.setFormatter(logging.Formatter(logfmt))

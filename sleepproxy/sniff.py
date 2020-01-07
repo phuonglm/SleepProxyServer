@@ -1,6 +1,5 @@
 from select import select
 from threading import Event, Thread
-
 from scapy.config import conf
 from scapy.data import ETH_P_ALL, MTU
 
@@ -21,8 +20,8 @@ class SnifferThread(Thread):
         self._stop_recd.set()
 
     def _sniff(self):
+        conf.verb = 0
         sock = conf.L2listen(type=ETH_P_ALL, filter=self._filterexp, iface=self._iface)
-
         while 1:
             try:
                 sel = select([sock], [], [], 1)

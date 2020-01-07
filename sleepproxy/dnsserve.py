@@ -163,8 +163,8 @@ class SleepProxyServer(DatagramServer):
                     mask = address['netmask']
                     if af == netifaces.AF_INET6: mask = (mask.count('f') * 4) # convert linux masks to prefix length...gooney
                     if address['addr'].find('%') > -1: continue #more linux ipv6 stupidity
-                    iface_net = ipaddress.ip_interface('%s/%s' % (address['addr'], mask)).network
-                    if ipaddress.ip_address(raddress[0]) in iface_net:
+                    iface_net = ipaddress.ip_interface(u'%s/%s' % (address['addr'], mask)).network
+                    if ipaddress.ip_address(u'%s' % raddress[0]) in iface_net:
                         info['mymac'] = ifaddresses[netifaces.AF_LINK][0]['addr']
                         info['myif'] = iface
     
@@ -204,6 +204,6 @@ class SleepProxyServer(DatagramServer):
         response.flags = dns.flags.QR | dns.opcode.to_flags(dns.opcode.UPDATE)
         #needs a single OPT record to confirm registration:  0 TTL    4500   48 . OPT Max 1440 Lease 7200 Vers 0 Seq  21 MAC D4:9A:20:DE:9D:38
         response.use_edns(edns=True, ednsflags=dns.rcode.NOERROR, payload=query.payload, options=[query.options[0]]) #payload should be 1440, theoretical udp-over-eth maxsz stdframe
-        logging.warning("Confirming SPS registration @%s with %s[%s] for %s secs" % (query.options[1].seq, address[0], query.options[1].pmac, query.options[0].lease))
+        logging.info("Confirming SPS registration @%s with %s[%s] for %s secs" % (query.options[1].seq, address[0], query.options[1].pmac, query.options[0].lease))
         logging.debug('RESPONSE--\n\n%s\n\n%s\n\n--RESPONSE END' % (response,response.options))
         self.socket.sendto(response.to_wire(), address)

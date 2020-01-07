@@ -42,9 +42,12 @@ def _handle_packet(mac, address, packet):
     if packet[IP].dst != address:
         logging.debug("Sniffed a TCP SYN for the wrong address?: %s" % packet.show() )
         return
-    #logging.debug(packet.display())
+    logging.info("Got SYN packet from %s:%s > %s:%s" % (packet[IP].src, packet[TCP].sport, packet[IP].dst, packet[TCP].dport) )
+    logging.debug(packet.display(True))
+
     sleepproxy.manager.mdns.forget(mac) # pre-emptively drop adv to keep the mac from de-colliding its name
     sleep(0.4)
     wake(mac) #retry=15?
+
     #sleepproxy.manager.forget_host(mac) 
 

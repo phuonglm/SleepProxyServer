@@ -1,7 +1,7 @@
 from functools import partial
 import logging
 
-from scapy.all import ARP, Ether, sendp
+from scapy.all import ARP, Ether, sendp, conf
 
 import sleepproxy.manager
 from sleepproxy.sniff import SnifferThread
@@ -32,11 +32,14 @@ def forget(mac):
     del _HOSTS[mac]
 
 def _handle_packet(address, mac, sleeper, packet):
+    if logging.getLogger().getEffectiveLevel() > logging.DEBUG:
+        conf.verb = 0
+
     if ARP not in packet:
         # I don't know how this happens, but I've seen it
         return
     if packet.hwsrc.replace(':','') == sleeper: #grat-arp from sleeper on wakeup
-        logging.warning("sleeper[%s] has awakened, deregistering it" % sleeper)
+        logging.info("sleeper[%s] has awakened, deregistering it" % sleeper)
         sleepproxy.manager.forget_host(sleeper)
         return
     if packet[ARP].op != ARP.who_has:
@@ -44,7 +47,7 @@ def _handle_packet(address, mac, sleeper, packet):
     if packet[ARP].pdst != address:
         logging.debug("Skipping packet with pdst %s != %s" % (packet[ARP].pdst, address, ))
         return
-    logging.debug(packet.display())
+    logging.debug(packet.display(True))
 
     ether = packet[Ether]
     arp = packet[ARP]
@@ -56,5 +59,5 @@ def _handle_packet(address, mac, sleeper, packet):
             pdst=arp.psrc,
             hwsrc=mac,
             hwdst=packet[ARP].hwsrc)
-    logging.info("Spoofing ARP response for %s to %s" % (arp.pdst, packet[ARP].psrc))
+    logging.debug("Spoofing ARP response for %s to %s" % (arp.pdst, packet[ARP].psrc))
     sendp(reply)
